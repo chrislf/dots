@@ -9,8 +9,7 @@ windowSize :: Int
 windowSize = 300
 
 glossMain :: IO ()
---glossMain = display (InWindow "Window Name" (windowSize, windowSize) (10, 10)) white (showArray a)
-glossMain = animate (InWindow "Window Name" (windowSize, windowSize) (10, 10)) white (\t -> showArray (animateArray t a))
+glossMain = animate (InWindow "Window Name" (windowSize, windowSize) (10, 10)) white (\t -> showArray (heatToArray (animateFire t)))
 
 
 data LED = LED {
@@ -26,6 +25,34 @@ showLED (LED colour lit) = Color colour l
           else Circle 10
 
 type Array = [[LED]]
+
+
+
+type Heat = [[Int]]
+
+
+animateFire t = head . drop (3 * round t) . iterate fire $ [initFire]
+
+initFire = take 10 (repeat 100)
+
+fire :: Heat -> Heat
+fire xss = initFire : init (push xss)
+  where
+    push = foldl f [(head xss)]
+    f = \acc xs -> (map (subtract 10) xs):acc
+
+
+
+heatToArray :: Heat -> Array
+heatToArray = map (map toLED)
+  where
+    toLED n 
+      | n > 90 = rll
+      | n > 80 = gll
+      | otherwise = bll
+    
+
+
 
 
 rll = LED red True
