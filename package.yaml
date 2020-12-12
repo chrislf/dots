@@ -36,6 +36,7 @@ executables:
     dependencies:
     - dots
     - gloss
+    - random
 
 tests:
   dots-test:

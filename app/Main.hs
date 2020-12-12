@@ -2,6 +2,8 @@ module Main where
 
 import Graphics.Gloss
 import Data.Function (on)
+import System.Random
+import Data.List
 
 import Lib
 
@@ -18,8 +20,8 @@ glossMain =
     )
     white
     1
-    [initFire]
-    (showArray . heatToArray)
+    (HeatModel (mkStdGen 100) [initFire])
+    (showArray . heatToArray . heatArray)
     (\_ _ a -> fire a)
 
 
@@ -37,14 +39,29 @@ showLED (LED colour lit) = Color colour l
 
 type Array = [[LED]]
 
+data Model = HeatModel {
+    randomGenerator :: StdGen
+  , heatArray :: Heat
+}
+
 type Heat = [[Int]]
 
 initFire = replicate 10 100
 
-fire :: Heat -> Heat
-fire orig = initFire : take 10 top
+fire :: Model -> Model
+fire (HeatModel rg orig) = HeatModel newg (initFire : take 10 top)
   where
-    makeNewRow = map (subtract 10)
+    --L.unfoldr :: (b -> Maybe (a, b)) -> b -> [a]
+    f :: (Int, StdGen) -> Maybe ((Int, StdGen), (Int, StdGen))
+    f (_, g) =
+      let (val, g') = randomR (1, 10) g
+      in Just ((val, g'), (val, g'))
+
+    stff = (take 10 $ unfoldr f (0, rg)) :: [(Int, StdGen)]
+    aa = (map fst stff) :: [Int]
+    newg = snd . last $ stff
+    makeNewRow :: [Int] -> [Int]
+    makeNewRow r = zipWith (\a x -> subtract (10*a) x) aa r
     top = map makeNewRow orig
 
 
