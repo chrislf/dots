@@ -31,27 +31,22 @@ type Array = [[LED]]
 type Heat = [[Int]]
 
 
-animateFire t = head . drop (3 * round t) . iterate fire $ [initFire]
+
+animateFire t = head . drop (round t) . iterate fire $ [initFire]
 
 initFire = take 10 (repeat 100)
 
 fire :: Heat -> Heat
-fire xss = initFire : init (push xss)
+fire orig = initFire : take 10 top
   where
-    push = foldl f [(head xss)]
-    f = \acc xs -> (map (subtract 10) xs):acc
-
+    makeNewRow = map (\val -> (subtract 10) val)
+    top = map makeNewRow orig
 
 
 heatToArray :: Heat -> Array
 heatToArray = map (map toLED)
   where
-    toLED n 
-      | n > 90 = rll
-      | n > 80 = gll
-      | otherwise = bll
-    
-
+    toLED n = LED (makeColor 1 ((100-(fromIntegral n))/100) 0 1) True
 
 
 
