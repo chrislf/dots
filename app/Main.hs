@@ -19,7 +19,7 @@ glossMain =
       (10, 10)
     )
     white
-    1
+    10
     (HeatModel (mkStdGen 100) [initFire])
     (showArray . heatToArray . heatArray)
     (\_ _ a -> fire a)
@@ -51,16 +51,15 @@ initFire = replicate 10 100
 fire :: Model -> Model
 fire (HeatModel rg orig) = HeatModel newg (initFire : take 10 top)
   where
-    --L.unfoldr :: (b -> Maybe (a, b)) -> b -> [a]
+    -- YUCK
     f :: (Int, StdGen) -> Maybe ((Int, StdGen), (Int, StdGen))
     f (_, g) =
-      let (val, g') = randomR (1, 10) g
+      let (val, g') = randomR (1, 3) g
       in Just ((val, g'), (val, g'))
 
     stff = (take 10 $ unfoldr f (0, rg)) :: [(Int, StdGen)]
-    aa = (map fst stff) :: [Int]
+    aa = map fst stff
     newg = snd . last $ stff
-    makeNewRow :: [Int] -> [Int]
     makeNewRow r = zipWith (\a x -> subtract (10*a) x) aa r
     top = map makeNewRow orig
 
