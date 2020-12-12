@@ -1,0 +1,4 @@
+.stack-work/
+dots.cabal
+*.swp
+*~
