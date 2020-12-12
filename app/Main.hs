@@ -9,7 +9,18 @@ windowSize :: Int
 windowSize = 300
 
 glossMain :: IO ()
-glossMain = animate (InWindow "Window Name" (windowSize, windowSize) (10, 10)) white (\t -> showArray (heatToArray (animateFire t)))
+glossMain =
+  simulate
+    (InWindow
+      "Window Name"
+      (windowSize, windowSize)
+      (10, 10)
+    )
+    white
+    1
+    [initFire]
+    (showArray . heatToArray)
+    (\_ _ a -> fire a)
 
 
 data LED = LED {
@@ -26,44 +37,22 @@ showLED (LED colour lit) = Color colour l
 
 type Array = [[LED]]
 
-
-
 type Heat = [[Int]]
 
-
-
-animateFire t = head . drop (round t) . iterate fire $ [initFire]
-
-initFire = take 10 (repeat 100)
+initFire = replicate 10 100
 
 fire :: Heat -> Heat
 fire orig = initFire : take 10 top
   where
-    makeNewRow = map (\val -> (subtract 10) val)
+    makeNewRow = map (subtract 10)
     top = map makeNewRow orig
 
 
 heatToArray :: Heat -> Array
 heatToArray = map (map toLED)
   where
-    toLED n = LED (makeColor 1 ((100-(fromIntegral n))/100) 0 1) True
+    toLED n = LED (makeColor 1 ((100-fromIntegral n)/100) 0 1) True
 
-
-
-rll = LED red True
-gll = LED green True
-bll = LED blue True
-
-a = [
-    [ rll, rll, rll, rll ]
-  , [ gll, gll, gll, gll ]
-  , [ bll, bll, bll, bll ]
-  , [ rll, gll, bll, rll ]
-  ]
-
-
-animateArray :: Float -> Array -> Array
-animateArray f = take (round f)
 
 showArray :: Array -> Picture
 showArray xss = result
